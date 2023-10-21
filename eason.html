@@ -4,8 +4,9 @@
 <title>Page Title</title>
 </head>
 <body>
-<h1>遊戲介紹</h1>
-<p>傳說對決介紹</p>
+<h1>python
+</h1>
+<p>網路爬蟲介紹</p>
 <hr>
 
 <h3>內容簡介</h3>
@@ -13,7 +14,21 @@
 <table border="1">
 
 <tr>
-<td>截至2023年7月12日，共有117位英雄（包含-重做英雄：海倫、凱恩，移除英雄：佩娜、DC蝙蝠俠）[6]，目前實際英雄為115位英雄，每隻英雄都可透過遊玩對局獲得熟練度（不倒扣），遊玩排位賽或是傳說之巔獲勝可獲得傳說戰力，但是對局失敗或是超過1週未使用該英雄會倒扣（英雄戰力過低失敗不會倒扣有時反而會增加）。將英雄劃分為六種職業及五個分路，每個英雄會根據自身的職業擁有相對應的屬性，而部分英雄具有有多重定位。英雄造成傷害的類型共有三種：物理傷害、魔法傷害以及真實傷害。部分英雄會同時擁有造成多種屬性傷害的能力。「真實」傷害，無論是物理或魔法防禦的裝備也無法與之抗衡。
+<td>何謂網路爬蟲傀儡程式？ 網路爬蟲、蜘蛛，或搜尋引擎傀儡程式下載網際網路上所有的內容並製作相關索引。 此類傀儡程式旨在學習網站(幾乎) 每個網頁，以便有必要時擷取資訊。 稱此應用程式為「網路爬蟲」是因為「爬行」是技術名詞，指的是自動存取網站，以及透過軟體程式取得資料。因為每個網站爬取的方式不太相同，要取的 tag 會不同，所以我們以獨立的 Crawler 去管理各個網站的爬蟲，但因為他們有一些功能會相同並且沿用，所以先以 BaseCrawler 定義基礎 fucntion ，並讓未來 Class 可以繼承。
+
+</tr>
+<table>
+
+<table border="1">
+
+
+<h4>爬蟲概念</h4>
+
+<tr>
+<td>基本概念是: 透過程式模擬瀏覽網頁訪問的行為，例如: 上下捲動頁面、登入、點選…等動作，然後自動化從網頁擷取想要的資訊，資訊可以是文字、圖片、表格，或是網站上的各種內容。
+
+實際的技術行為是，爬蟲(自動化的程式)，透過網路的傳輸協定（HTTP/HTTPS）發送請求到目標網站，然後目標網站的伺服器會 return 網頁的原始碼(HTML) 。這些原始碼就包含了網頁的內容，而我們可以利用 HTML Tag 去提取與篩選需要的資訊。
+
 </td>
 </tr>
 <table>
@@ -21,26 +36,119 @@
 <table border="1">
 
 
-<h4>製作背景</h4>
+<h4>製作過程</h4>
 
 <tr>
-<td>遊戲背景設定在艾森諾世界，千百年來，眾神和惡魔之間爆發過無數次戰爭。
-他們交戰的時候，從天上打到地下、從雪山打到大海、從荒漠打到沼澤……世界的每個角落，都可以成為他們對決的戰場。神魔大戰為這個世界帶來了毀滅性的打擊，因此消亡的生命物種不計其數，即使是大陸的實際統治者——人類和獸羣，也曾一度瀕臨滅絕的邊緣。
-然而，無論是高高在上的眾神、還是隱藏於黑暗中的惡魔，對這些看似脆弱的生命都毫無憐憫之意。“不過是羣卑微的螻蟻而已。”輕蔑的態度，深深傷害了這些智慧生命種羣的自尊心。
-倍受打擊的人類回到了自己的城堡。鐵匠放棄幻想，重新燃起爐火為戰士們打造精良的武器裝備；智慧的修道士也捨棄了對諸神的信仰，他們翻遍圖書館的典籍，試圖從中找出上古遺留的魔法和科學之秘。
-</td>
+<td>1. 先爬取此頁的所有文章連結
+2. 再到每一個文章的頁面爬取該文章的標題與內文
+另外為保留未來多支爬蟲運行，且有相同功能的 function 可以沿用與好管理，我們把程式的架構分成兩個部分和多個 function，密碼為
+# crawler.py 
+
+import os
+import requests
+from tqdm import tqdm
+from datetime import datetime
+from bs4 import BeautifulSoup
+
+class BaseCrawler:
+    def __init__(self, root_url, topic_url):
+        self.root_url = root_url
+        self.topic_url = topic_url
+
+    def send_http_request(self, url):
+        response = requests.get(url)
+        return response
+
+    def parse_html(self, response):
+        soup = BeautifulSoup(response.text, 'html.parser')
+        return soup
+
+    def save_data(self, folder_path, title, content):
+
+        # check title and data is str
+        if not isinstance(title, str):
+            title = str(title)
+        if not isinstance(content, str):
+            content = str(content)
+
+        # check file exist
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+        
+        # valid title when it as filename
+        filename = "".join(c for c in title if c.isalnum() or c.isspace()).rstrip()
+        file_path = os.path.join(folder_path, f"{filename}.txt")
+
+        # save  
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(content)
+
+
+class SportVisionCrawler(BaseCrawler):
+    
+    def __init__(self, root_url, topic_url):
+        self.root_url = root_url
+        self.topic_url = topic_url
+
+    def get_all_links(self, topic_url):
+
+        # check request root_url
+        response = self.send_http_request(topic_url)
+        if not response.ok:
+            print("Request failed")
+            return
+    
+        if response.ok:
+            print("Request successful")
+        
+        soup = self.parse_html(response)
+        h4_elements = soup.find_all('h4')
+
+        link_list = []
+        for h4_element in h4_elements:
+            a_element = h4_element.find('a')
+            if a_element:
+                link = a_element['href']
+                link_list.append(link)
+        return link_list
+    
+    def crawl(self, link_list):
+        for link in tqdm(link_list):
+            
+            response = self.send_http_request(link)
+            soup = self.parse_html(response)
+            title = soup.find('h1').text
+            content = soup.find('div', class_='article-content').get_text(strip=True)
+
+    self.save_data('./output_crawl/Sport_vision_crawl',title, content)
+
+if __name__ == "__main__":
+
+    print('SportVisionCrawler')
+    root_url = ''
+    topic_url = 'https://www.sportsv.net/basketball'
+    crawler = SportVisionCrawler(root_url, topic_url)
+    link_list = crawler.get_all_links(topic_url)
+    crawler.crawl(link_list)
+    Next step
+Selenium crawler
+加入logger管理
+Error handling
+Content save to DB
+
+
+
+
+
+</td>總結
 </tr>
-<table>
-
-<table border="1">
-
-
-<h4>遊玩過程</h4>
-
-<tr>
-<td>以第三人稱視角進行。玩家需要選擇一位「英雄」進行操控，並且這些英雄各自都有不同的技能
-。英雄初始等級1級，透過玩家對線（擊殺小兵），擊殺敵人、野怪以進行招式升級也可以在裝備商店購買適當的裝備讓自己的角色變強。有各種不同的遊玩模式，而一般的獲勝條件是需要摧毀敵方主堡，此遊戲需運用到打架技巧與遊戲觀念等。比賽完畢後會給玩家獎勵，例如：金幣，可以購買商城絕大部分的英雄（部分活動取得英雄除外）或奧義碎片（進行奧義升級）。除此之外，玩家也能參與「排位賽」模式，讓自己的水準不斷提升，贏場則加1顆星，輸則掉1顆星（倒扣機制）。若遇到玩家有掛網行為或者你是該場敗方MVP就有機會得到補償一顆星，有時也會給予排位掉星保護卡（勝方/敗方MVP加星卡和敗方加星保護卡）</td>
-</tr>
+1. 爬取所有文章列表的連結
+2. 從連結在爬取所有標題與內文
+3. 設計可擴展的框架，以管理未來新增的爬蟲管道
+看完以上結果後你會發現幾個重點：
+Python 網路爬蟲只是模擬使用者操作瀏覽器的行為。
+透過Get 請求可以向網頁伺服器請求資料。
+收到的資料其實是網頁程式碼(HTML語法)，所以學會HTML會對網路爬蟲非常有幫助！
 <table>
 
 
